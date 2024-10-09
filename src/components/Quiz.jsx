@@ -24,6 +24,7 @@ export default function Quiz() {
     );
   }
 
+  // O embaralhamento das questões precisa ir depois para o array na estourar
   const shuffledAnswers = [...QUESTIONS[activeQuestionIndex].answers];
   shuffledAnswers.sort((a, b) => Math.random() - 0.5);
 
