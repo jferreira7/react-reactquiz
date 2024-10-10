@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
-import quizCompleteImg from "../assets/quiz-complete.png";
+import Question from "./Question.jsx";
+import Summary from "./Summary.jsx";
+
 import QUESTIONS from "../questions.js";
 
 export default function Quiz() {
@@ -9,37 +11,32 @@ export default function Quiz() {
   const activeQuestionIndex = userAnswers.length;
   const quizIsComplete = activeQuestionIndex === QUESTIONS.length;
 
-  const handleSelectAnswer = (selectedAnswer) => {
+  /* 
+    Foi necessário utilizar o useCallback pois a chamada de uma função cria um novo objeto 
+    quando o componente inicia um novo ciclo. Para isso que serve o useCallback, para evitar 
+    esse efeito colateral.
+  */
+
+  const handleSelectAnswer = useCallback((selectedAnswer) => {
     setUserAnswers((prevUserAnswers) => {
       return [...prevUserAnswers, selectedAnswer];
     });
-  };
+  }, []);
+
+  const handleSkipAnswer = useCallback(() => handleSelectAnswer(null), [handleSelectAnswer]);
 
   if (quizIsComplete) {
-    return (
-      <div id="summary">
-        <img src={quizCompleteImg} alt="Trophy icon" />
-        <h2>Quiz Completed!</h2>
-      </div>
-    );
+    return <Summary userAnswers={userAnswers} />;
   }
-
-  // O embaralhamento das questões precisa ir depois para o array na estourar
-  const shuffledAnswers = [...QUESTIONS[activeQuestionIndex].answers];
-  shuffledAnswers.sort((a, b) => Math.random() - 0.5);
 
   return (
     <div id="quiz">
-      <div id="question">
-        <h2>{QUESTIONS[activeQuestionIndex].text}</h2>
-        <ul id="answers">
-          {shuffledAnswers.map((answer) => (
-            <li key={answer} className="answer">
-              <button onClick={() => handleSelectAnswer(answer)}>{answer}</button>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Question
+        key={activeQuestionIndex}
+        index={activeQuestionIndex}
+        onSelectAnswer={handleSelectAnswer}
+        onSkipAnswer={handleSkipAnswer}
+      />
     </div>
   );
 }
